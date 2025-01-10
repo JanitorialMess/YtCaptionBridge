@@ -1,0 +1,36 @@
+services:
+  api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - PROJECT_NAME=${PROJECT_NAME}
+      - API_BASE=${API_BASE}
+      - HOST=0.0.0.0
+      - PORT=8000
+      - API_KEY_NAME=${API_KEY_NAME}
+      - API_KEY=${API_KEY}
+      - RATE_LIMIT_ENABLED=${RATE_LIMIT_ENABLED}
+      - RATE_LIMIT=${RATE_LIMIT}
+      - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}
+      - DOCS_ENABLED=${DOCS_ENABLED}
+      - LOG_LEVEL=${LOG_LEVEL}
+    volumes:
+      - ./:/app:ro
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./app
+          target: /app/app
+        - action: rebuild
+          path: requirements.txt
