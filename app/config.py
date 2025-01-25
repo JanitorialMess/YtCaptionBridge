@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     port: int = Field(default=8000, ge=1, le=65535)
     
     # Security
-    api_key_name: str = "X-API-Key"
+    api_key_name: str = "key"
     api_key: str
     
     # Rate Limiting

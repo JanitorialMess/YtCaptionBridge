@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, Union
 from enum import Enum
 
 class OutputFormat(str, Enum):
@@ -21,8 +21,7 @@ class TranscriptResponse(BaseModel):
     auto_generated: bool
     was_translated: bool
     available_translations: Optional[List[str]] = None
-    formatted_content: str
-
+    formatted_content: Any
 class ErrorResponse(BaseModel):
     error: str
     message: str

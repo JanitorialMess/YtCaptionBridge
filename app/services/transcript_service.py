@@ -20,6 +20,7 @@ from ..exceptions.transcript_exceptions import (
     TranscriptServiceException,
 )
 
+import json
 from typing import Optional
 from loguru import logger
 from fastapi import status, HTTPException
@@ -103,7 +104,10 @@ class TranscriptService:
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
                 )
             
-            formatted_transcript = formatter.format_transcript(data)
+            if output_format == OutputFormat.JSON:
+                formatted_transcript = json.loads(formatter.format_transcript(data))
+            else:
+                formatted_transcript = formatter.format_transcript(data)
             
             # Create response object
             response = TranscriptResponse(
