@@ -14,7 +14,7 @@ A lightweight REST API proxy for fetching YouTube video captions. Built with Fas
 
 ### Prerequisites
 
-- Python 3.9+
+- Python 3.11+
 - pip
 - virtualenv (recommended)
 
@@ -51,7 +51,7 @@ The API will be available at `http://localhost:8000`
 Build and run using Docker:
 ```sh
 docker build -t ytcaptionsbridge . 
-docker run --name YtCaptionsBridge -p 8000:8000 ytcaptionsbridge 
+docker run --name YtCaptionsBridge -p 8000:7777 ytcaptionsbridge 
 ```
 
 
@@ -59,20 +59,20 @@ docker run --name YtCaptionsBridge -p 8000:8000 ytcaptionsbridge
 
 ### Get Transcript
 ```
-GET /api/v1/transcripts/{video_id}/lang/{language}.{format}
+GET /api/v1/transcripts/{video_id}/{language}.{format}
 ```
 
 Parameters:
 - `video_id`: YouTube video ID
 - `language`: Language code (e.g., 'en', 'es', 'fr')
 - `format`: Output format ('txt', 'srt')
-- `auto`: (optional) Use auto-generated captions
-- `target_language`: (optional) Translate captions to this language
+- `auto`: (optional) Use auto-generated captions (default: false)
+- `prefer`: (optional) Set to 'auto' to prefer auto-generated captions (default: 'manual')
+- `translate`: (optional) Translate captions to this language
 
 Example:
 ```
-curl -X GET "http://localhost:8000/api/v1/transcripts/E4WlUXrJgy4/lang/en.txt" \
-     -H "X-API-Key: your-secret-key-here"
+curl -X GET "http://localhost:8000/api/v1/transcripts/E4WlUXrJgy4/en.txt&key=your-secret-key-here"
 ```
 
 ## Configuration
