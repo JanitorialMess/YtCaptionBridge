@@ -12,13 +12,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN useradd -m -u 1000 appuser && \
-    chown -R appuser:appuser /app && \
-    mkdir -p /app/logs && \
-    chown -R appuser:appuser /app/logs
+RUN mkdir -p /app/logs && \
+    chown -R root:root /app/logs
 
-USER appuser
+USER root
 
-EXPOSE 8000
+EXPOSE 7777
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "7777"]
