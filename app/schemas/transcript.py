@@ -7,12 +7,17 @@ class OutputFormat(str, Enum):
     TEXT = "txt"
     SRT = "srt"
     VTT = "vtt"
+    
+class CaptionsType(str, Enum):
+    AUTO = "auto"
+    MANUAL = "manual"
 
 class TranscriptRequest(BaseModel):
     video_id: str
     language: str
     auto: bool = False
-    target_language: Optional[str] = None
+    translate: Optional[str] = None
+    prefer: Optional[CaptionsType] = CaptionsType.MANUAL
     output_format: OutputFormat = OutputFormat.JSON
 
 class TranscriptResponse(BaseModel):
@@ -21,7 +26,7 @@ class TranscriptResponse(BaseModel):
     auto_generated: bool
     was_translated: bool
     available_translations: Optional[List[str]] = None
-    formatted_content: Any
+    transcript: Any
 class ErrorResponse(BaseModel):
     error: str
     message: str

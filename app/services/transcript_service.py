@@ -11,6 +11,7 @@ from youtube_transcript_api.formatters import (
     SRTFormatter,
 )
 from ..schemas.transcript import (
+    CaptionsType,
     TranscriptResponse,
     OutputFormat,
 )
@@ -31,7 +32,8 @@ class TranscriptService:
         video_id: str,
         language: str,
         auto: bool = False,
-        target_language: Optional[str] = None,
+        translate: Optional[str] = None,
+        prefer: Optional[CaptionsType] = CaptionsType.MANUAL,
         output_format: OutputFormat = OutputFormat.JSON,
     ) -> TranscriptResponse:
         try:
@@ -40,9 +42,11 @@ class TranscriptService:
             available_translations = []
             
             try:
-                # Get transcript based on auto parameter
-                if auto:
+                if auto and prefer == CaptionsType.AUTO:
                     transcript = transcript_list.find_generated_transcript([language])
+                elif auto:
+                    # Give priority to manual transcripts since they tend to be more accurate
+                    transcript = transcript_list.find_transcript([language])
                 else:
                     transcript = transcript_list.find_manually_created_transcript([language])
                 
@@ -53,8 +57,7 @@ class TranscriptService:
                         for lang in transcript.translation_languages
                     ]
                 
-                # Handle translation if target language is specified
-                if target_language and target_language != language:
+                if translate and translate != language:
                     if not transcript.is_translatable:
                         raise TranscriptServiceException(
                             f"Translation is not available from {language} for this video",
@@ -62,14 +65,14 @@ class TranscriptService:
                             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
                         )
                     
-                    if target_language not in available_translations:
+                    if translate not in available_translations:
                         raise LanguageNotAvailableException(
-                            target_language,
+                            translate,
                             video_id,
                             available_translations
                         )
                     
-                    transcript = transcript.translate(target_language)
+                    transcript = transcript.translate(translate)
                     was_translated = True
                     
             except NoTranscriptFound:
@@ -86,10 +89,8 @@ class TranscriptService:
                     available_languages
                 )
             
-            # Fetch and format transcript data
             data = transcript.fetch()
             
-            # Format transcript based on requested output format
             formatter = {
                 OutputFormat.JSON: JSONFormatter(),
                 OutputFormat.TEXT: TextFormatter(),
@@ -109,16 +110,14 @@ class TranscriptService:
             else:
                 formatted_transcript = formatter.format_transcript(data)
             
-            # Create response object
             response = TranscriptResponse(
                 video_id=video_id,
-                language=target_language if was_translated else language,
+                language=translate if was_translated else language,
                 auto_generated=auto,
                 was_translated=was_translated,
-                formatted_content=formatted_transcript,
+                transcript=formatted_transcript,
                 available_languages=available_translations,
             )
-            
             return response
                 
         except VideoUnavailable:
