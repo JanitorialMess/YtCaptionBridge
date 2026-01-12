@@ -42,4 +42,4 @@ watchfiles==1.0.3
 websockets==14.1
 win32_setctime==1.2.0
 wrapt==1.17.0
-youtube-transcript-api==0.6.3
+youtube-transcript-api==1.2.3

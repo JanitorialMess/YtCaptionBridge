@@ -37,7 +37,8 @@ class TranscriptService:
         output_format: OutputFormat = OutputFormat.JSON,
     ) -> TranscriptResponse:
         try:
-            transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+            ytt_api = YouTubeTranscriptApi()
+            transcript_list = ytt_api.list(video_id)
             was_translated = False
             available_translations = []
             
@@ -53,7 +54,7 @@ class TranscriptService:
                 # Get available translations for the found transcript
                 if hasattr(transcript, 'translation_languages'):
                     available_translations = [
-                        lang['language_code'] 
+                        lang.language_code 
                         for lang in transcript.translation_languages
                     ]
                 
@@ -77,11 +78,10 @@ class TranscriptService:
                     
             except NoTranscriptFound:
                 # Get list of available languages based on auto parameter
-                available_languages = (
-                    [t.language_code for t in transcript_list._generated_transcripts.values()]
-                    if auto else
-                    [t.language_code for t in transcript_list._manually_created_transcripts.values()]
-                )
+                available_languages = [
+                    t.language_code for t in transcript_list
+                    if (auto and t.is_generated) or (not auto and not t.is_generated)
+                ]
                 
                 raise LanguageNotAvailableException(
                     language,
